@@ -1,6 +1,7 @@
 from . import base
 from .decorators import command_custom
 from tuned import consts
+from tuned.utils.services import services
 import tuned.logs
 import errno
 import perf
@@ -77,12 +78,7 @@ class IrqbalancePlugin(base.Plugin):
 		return "\n".join(lines)
 
 	def _restart_irqbalance(self):
-		# Exit code 5 means unit not found (see 'EXIT_NOTINSTALLED' in
-		# systemd.exec(5))
-		retcode, out = self._cmd.execute(
-			["systemctl", "try-restart", "irqbalance"],
-			no_errors=[5])
-		if retcode != 0:
+		if not services().restart("irqbalance"):
 			log.warning("Failed to restart irqbalance. Is it installed?")
 
 	def _set_banned_cpus(self, banned_cpulist_string):

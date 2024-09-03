@@ -6,6 +6,7 @@ from tuned.exceptions import TunedException
 from tuned.profiles.exceptions import InvalidProfileException
 import tuned.consts as consts
 from tuned.utils.commands import commands
+from tuned.utils.services import services
 from tuned import exports
 from tuned.utils.profile_recommender import ProfileRecommender
 import re
@@ -184,13 +185,7 @@ class Daemon(object):
 		return errstr
 
 	def _full_rollback_required(self):
-		retcode, out = self._cmd.execute(["systemctl", "is-system-running"], no_errors = [0])
-		if retcode < 0:
-			return False
-		if out[:8] == "stopping":
-			return False
-		retcode, out = self._cmd.execute(["systemctl", "list-jobs"], no_errors = [0])
-		return re.search(r"\b(shutdown|reboot|halt|poweroff)\.target.*start", out) is None and not retcode
+		return not services().is_system_stopping()
 
 	def _thread_code(self):
 		if self._profile is None:

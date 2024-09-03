@@ -59,6 +59,7 @@ import tuned.gtk.gui_profile_loader
 import tuned.gtk.gui_plugin_loader
 import tuned.profiles.profile as profile
 import tuned.utils.global_config
+from tuned.utils.services import services
 from tuned.gtk.tuned_dialog import TunedDialog
 
 from tuned.gtk.managerException import ManagerException
@@ -713,9 +714,9 @@ class Base(object):
 #			 switch option for start tuned on start up
 
 			if self._gobj('switchTunedStartupStartStop').get_active():
-				self._su_execute(['systemctl', 'enable', 'tuned'])
+				services().enable('tuned')
 			else:
-				self._su_execute(['systemctl', 'disable', 'tuned'])
+				services().disable('tuned')
 		else:
 			raise NotImplementedError()
 
@@ -727,10 +728,7 @@ class Base(object):
 		Depends on if tuned is set to run on startup of system return true if yes, else return false
 		"""
 
-		temp = self._execute(['systemctl', 'is-enabled', service, '-q'])
-		if temp == 0:
-			return True
-		return False
+		return services().is_enabled(service)
 
 	def error_dialog(self, error, info):
 		"""
